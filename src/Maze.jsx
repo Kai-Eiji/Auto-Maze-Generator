@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Box from './Box/Box';
 import './Maze.css'
+import {ButtonToolbar, Button, DropdownItem, DropdownButton, Container, Row, Col} from 'react-bootstrap';
 
 
 export default class Maze extends Component
@@ -16,7 +17,8 @@ export default class Maze extends Component
             grid: [],
             currRow: 0,
             currCol: 0,
-            pause: true
+            pause: true,
+            complete: false
         };
     }
 
@@ -31,20 +33,14 @@ export default class Maze extends Component
     updateBox(row, col)
     {
         let currBox = this.getCurr();
-        
         currBox.curr = false;
         currBox.vissited = true;
-        console.log("row:", row, " col:", col);
 
         let newBox = this.state.grid[row][col];
         this.removeWalls(currBox, newBox);
         newBox.curr = true;
         this.setState({currRow:row, currCol:col});
-
         this.stack.push(currBox);
-        console.log("updateBox");
-        console.log(this.stack);
-        
     }
 
     getCurr()
@@ -84,9 +80,7 @@ export default class Maze extends Component
         if(bottom && !bottom.vissited){nighbors.push(bottom);}
 
         if(nighbors.length > 0)
-        {
-            let currBox = this.getCurr();
-            
+        {   
             let rand = Math.floor(Math.random() * nighbors.length);
             const nextBox = nighbors[rand];
             this.updateBox(nextBox.row, nextBox.col);
@@ -96,14 +90,14 @@ export default class Maze extends Component
         {
             let curr = this.getCurr();
             curr.vissited = true;
-
+            
             let currBox = this.stack.pop();
-            console.log("popped box: ", currBox);
             currBox.back = true;
             this.setState({currRow: currBox.row, currCol: currBox.col});
             currBox.back = false;
             return true;
         }
+        this.setState({complete : true});
         return false;
 
     }
@@ -132,15 +126,52 @@ export default class Maze extends Component
         }
     }
 
+    setStart(row, col)
+    {
+        let prevBox = this.getCurr();
+        let currBox = this.getBox(row, col);
+        currBox.curr = true
+        prevBox.curr = false;
+        this.setState({currRow : row, currCol : col});
+    }
+
     start()
     {
         clearInterval(this.intervalId);
-        this.intervalId = setInterval(this.play, 100);
+        this.intervalId = setInterval(this.play, 30);
     }
 
     pause()
     {
         clearInterval(this.intervalId);
+    }
+
+    reset()
+    {
+        const newGrid = InitializeGrid(this.rows, this.cols);
+        this.setState({grid : newGrid, currRow : 0, currCol : 0, complete : false})
+        clearInterval(this.intervalId);
+    }
+
+    Complete()
+    {
+        console.log("complete")
+        if(this.state.complete)
+        {
+            return(
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
+                        <h2 className="complete">Maze Complete!</h2>
+                </div>
+            )
+        }
+        else
+        {
+            return(
+                <div style={{marginTop: "70px"}}>
+                </div>
+            )
+        }
+        
     }
 
     play = () =>
@@ -151,16 +182,27 @@ export default class Maze extends Component
     render()
     {
         const {grid} = this.state;
+        let status = this.Complete();
         console.log(grid);
         return(
-            <div>
+            <div className="back-color">
+                <h1 className="pt-3 pb-2" style={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "Aquamarine", opacity: 0.75, marginBottom : "0px"}}>Maze Generator</h1>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "Aquamarine", opacity: 0.75}}>
+                        
+                        <ButtonToolbar>
+                            <Button className="m-3" variant="outline-info" style={{opacity: 1}} onClick={() => this.start()}>START</Button>
+                            <Button className="m-3" variant="outline-info" onClick={() => this.pause()}>PAUSE</Button>
+                            <Button className="m-3" variant="outline-info" onClick={() => this.reset()}>RESET</Button>
+                        </ButtonToolbar>  
+                </div>
                 
-                <button onClick={() => this.start()}>START</button>
-                <button onClick={() => this.pause()}>PAUSE</button>
+                <div>{status}</div>
+                <Container style={{ display: "flex", justifyContent: "center", alignItems: "center"}}>
+                
                     <div className="grid">
                         {grid.map( (row, rowIndex)  =>{
                                 return(
-                                    <div key={rowIndex} className="row">
+                                    <div key={rowIndex} className="row-grid">
                                         {row.map( (box, boxIndex) => 
                                         {
                                             const {row, col, top, left, right, bottom, curr, vissited, back} = box;
@@ -177,7 +219,7 @@ export default class Maze extends Component
                                                     curr = {curr}
                                                     vissited = {vissited}
                                                     back = {back}
-                                                    onClick={() => this.updateBox(row, col)}
+                                                    onClick={() => this.setStart(row, col)}
                                                 ></Box>
                                             );
 
@@ -187,6 +229,7 @@ export default class Maze extends Component
                             }
                         )}
                     </div>
+                </Container>
             </div>
         );
             

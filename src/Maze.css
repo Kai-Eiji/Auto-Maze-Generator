@@ -1,7 +1,21 @@
 .grid{
-    margin: 90px 0 0;
+    margin: 20px 0 0;
+    background-color: lightcyan;
+    margin-bottom: 15%;
 }
 
-.row{
-    height: 21px;
+.row-grid{
+    height: 20px;
 }
+
+.back-color{
+    background-color: rgba(240, 128, 128, 0.63);
+}
+
+.complete{
+    color: lightseagreen;
+    margin-top: 20px;
+    font-weight: bold;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
