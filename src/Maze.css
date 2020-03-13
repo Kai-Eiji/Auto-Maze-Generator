@@ -2,10 +2,12 @@
     margin: 20px 0 0;
     background-color: lightcyan;
     margin-bottom: 15%;
+    min-width: 400px;
 }
 
 .row-grid{
     height: 20px;
+   
 }
 
 .back-color{
