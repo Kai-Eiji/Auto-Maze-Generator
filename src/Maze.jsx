@@ -30,17 +30,16 @@ export default class Maze extends Component
 
     updateBox(row, col)
     {
-        let newGrid = this.state.grid.slice();
-        let currBox = this.getCurr();//newGrid[this.state.currRow][this.state.currCol];
+        let currBox = this.getCurr();
         
         currBox.curr = false;
         currBox.vissited = true;
         console.log("row:", row, " col:", col);
 
-        let newBox = newGrid[row][col];
+        let newBox = this.state.grid[row][col];
         this.removeWalls(currBox, newBox);
         newBox.curr = true;
-        this.setState({grid : newGrid, currRow:row, currCol:col});
+        this.setState({currRow:row, currCol:col});
 
         this.stack.push(currBox);
         console.log("updateBox");
@@ -73,7 +72,6 @@ export default class Maze extends Component
 
     getNeighbors()
     {
-
         let nighbors = [];
         const top = this.getBox(this.state.currRow-1, this.state.currCol);
         const left = this.getBox(this.state.currRow, this.state.currCol-1);
@@ -87,6 +85,8 @@ export default class Maze extends Component
 
         if(nighbors.length > 0)
         {
+            let currBox = this.getCurr();
+            
             let rand = Math.floor(Math.random() * nighbors.length);
             const nextBox = nighbors[rand];
             this.updateBox(nextBox.row, nextBox.col);
@@ -94,15 +94,14 @@ export default class Maze extends Component
         }
         else if (this.stack.length > 0)
         {
-            let newGrid = this.state.grid.slice();
-            newGrid[this.state.currRow][this.state.currCol].vissited = true;
+            let curr = this.getCurr();
+            curr.vissited = true;
 
             let currBox = this.stack.pop();
             console.log("popped box: ", currBox);
-            currBox.curr = true;
-            this.setState({currRow: currBox.row, currCol: currBox.col, grid : newGrid});
-            //this.getNeighbors();
-            //this.updateBox(nextBox.row, nextBox.col);
+            currBox.back = true;
+            this.setState({currRow: currBox.row, currCol: currBox.col});
+            currBox.back = false;
             return true;
         }
         return false;
@@ -164,7 +163,7 @@ export default class Maze extends Component
                                     <div key={rowIndex} className="row">
                                         {row.map( (box, boxIndex) => 
                                         {
-                                            const {row, col, top, left, right, bottom, curr, vissited} = box;
+                                            const {row, col, top, left, right, bottom, curr, vissited, back} = box;
 
                                             return(
                                                 <Box
@@ -177,6 +176,7 @@ export default class Maze extends Component
                                                     bottom = {bottom}
                                                     curr = {curr}
                                                     vissited = {vissited}
+                                                    back = {back}
                                                     onClick={() => this.updateBox(row, col)}
                                                 ></Box>
                                             );
@@ -221,6 +221,6 @@ const createBox = (row, col) =>
         right: true,
         bottom: true,
         curr: false,
-        previousBox: null,
+        back: false,
     };
 };
